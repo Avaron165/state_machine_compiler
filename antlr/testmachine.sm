@@ -1,0 +1,54 @@
+statemachine My_Machine01 {
+    events:
+        ON;
+        OFF;
+        DIGIT(uint8_t value);
+        OPERATOR(char operator);
+        MORE_EVENT_DATA(char a, char b, char c);
+
+    # define ports used by this StateMachine
+    ports:  # ports statement
+        in:
+            porta;
+            history;
+            portb;
+        out:
+            outa;
+            outb;
+
+    states:
+        init{
+            entry: init_entry();
+            exit: init_exit();
+            DIGIT: process_digit();
+        };
+
+        submachine {
+            entry: entry_sub();
+
+            statemachine submachine {
+                events: 
+                    uses ON;
+                    uses OFF;
+
+                ports:
+                    in:
+                        history;
+                        user_in;
+                    out:
+                        user_out;
+
+                states:
+                    a{};
+                    b{};
+
+                transitions:
+                    automatic: a -> b;
+            };
+        };
+
+    transitions:
+
+        OPERATOR: init -> submachine : transition_function();
+
+};

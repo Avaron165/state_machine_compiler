@@ -1,0 +1,2 @@
+add_library(smf_calculator STATIC smf_calculator_implementation.c smf_logging.c smf_calculator_functions.c smf_calculator_on_implementation.c smf_calculator_on_functions.c)
+target_include_directories(smf_calculator PUBLIC ${CMAKE_CURRENT_LIST_DIR})

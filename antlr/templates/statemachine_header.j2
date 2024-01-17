@@ -1,0 +1,17 @@
+{% extends "base_header.j2" %}
+
+
+{% block include_section %}
+#include "smf_{{ statemachine.name|lower }}_types.h"
+#include "stdbool.h"
+#include "smf_general_types.h"
+{% endblock include_section %}
+
+{% block functions %}
+smf_return_t smf_{{ statemachine.name|lower }}_process(smf_{{ statemachine.name|lower }}__private_t* instance, smf_{{ statemachine.name|lower }}_event_t* event, bool* event_consumed, bool* autotransition_pending );
+smf_return_t smf_{{ statemachine.name|lower }}_process_until_next_event(smf_{{ statemachine.name|lower }}__private_t* instance, smf_{{ statemachine.name|lower }}_event_t* event, bool* event_consumed);
+smf_return_t smf_{{ statemachine.name|lower }}_start(smf_{{ statemachine.name|lower }}__private_t* instance);
+smf_return_t smf_{{ statemachine.name|lower }}_get_state(smf_{{ statemachine.name|lower }}__private_t* instance, uint8_t* current_active_states, smf_{{ statemachine.name|lower }}_states_t** states);
+{% endblock functions %}
+
+
