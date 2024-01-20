@@ -12,6 +12,8 @@ statemachine Calculator {
         on {
             entry: on_entry();
             exit: on_exit();
+
+            
             statemachine calculator_on {
                 events:
                     uses DIGIT;

@@ -1,0 +1,68 @@
+event ON;
+event OFF;
+event CLEAR;
+event DIGIT {
+    uint8_t digit;
+};
+event OPERATION {
+    uint8_t operator;
+};
+event EQUALS;
+
+statemachine calculator_on {
+    events:
+        uses DIGIT;
+        uses OPERATION;
+        uses EQUALS;
+    ports:
+        in:
+            history;
+    states:
+        input_digit {
+            DIGIT: input_digit();
+        };
+        op_entered {};
+        display_result {};
+    transitions:
+        automatic: start -> input_digit : initialize();
+        OPERATION: input_digit -> op_entered;
+        EQUALS : input_digit -> display_result;
+        automatic: op_entered -> input_digit;
+};
+
+
+statemachine Calculator {
+    events:
+        uses ON;
+        uses OFF;
+        uses CLEAR;
+        uses DIGIT;
+        uses OPERATION;
+        uses EQUALS;
+
+    states:
+
+        on {
+            entry: on_entry();
+            exit: on_exit();
+
+            statemachine calculator_on;
+
+        };
+
+        off {
+
+        };
+
+    transitions:
+
+        automatic: start -> on : start_on();
+        OFF: on -> off : on_off();
+        ON: off -> on;
+        CLEAR: on -> on;
+
+    data:
+
+        uint8_t currentValue;
+
+};
