@@ -2,4 +2,5 @@
 *.interp
 antlr/__pycache__/
 build/
+statemachine_compiler/__pycache__/
     
