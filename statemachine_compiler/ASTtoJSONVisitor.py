@@ -84,6 +84,20 @@ class ASTtoJSONVisitor(StateMachineParserVisitor):
         if ctx.event_usage_body():
             used_list = self.visitEvent_usage_body(ctx.event_usage_body(), json_rep["events"])
             statemachine["uses_events"] = used_list
+        self.visitStates_definition_body(ctx.states_definition_body(), statemachine, json_rep["events"])
+
+
+    # Visit a parse tree produced by StateMachineParser#states_definition_body.
+    def visitStates_definition_body(self, ctx:StateMachineParser.States_definition_bodyContext, statemachine, events):
+        states = {}
+        for state_ctx in ctx.state_definition():
+            state = self.visitState_definition(state_ctx, events, statemachine["uses_events"])
+        # TODO Fehlerbehandlung
+        statemachine["states"] = states
+
+    # Visit a parse tree produced by StateMachineParser#state_definition.
+    def visitState_definition(self, ctx:StateMachineParser.State_definitionContext, events, used_events):
+        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by StateMachineParser#event_usage_body.
     def visitEvent_usage_body(self, ctx:StateMachineParser.Event_usage_bodyContext, events):
