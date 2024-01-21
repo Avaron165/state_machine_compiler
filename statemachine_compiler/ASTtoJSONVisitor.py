@@ -18,6 +18,12 @@ class DuplicatedStatemachineDeclaration(StatemachineParserException):
         error_string +=   f'   previously declared in {machine2["declared_in"][-1][0]}: line {machine2["declared_at"]}'      
         super().__init__(error_string)
 
+class DuplicatedStateDeclaration(StatemachineParserException):
+    def __init__(self, state1, state2):
+        error_string =    f'{state1["declared_in"][-1][0]}: line {state1["declared_at"]} -- Duplicated declaration of state {state1["name"]}\n'
+        error_string +=   f'   previously declared in {state2["declared_in"][-1][0]}: line {state2["declared_at"]}'      
+        super().__init__(error_string)
+
 class UndefinedEventUsage(StatemachineParserException):
     def __init__(self, eventname, location):
         error_string =    f'{location[0][-1]}: line {location[1]} -- undefined event {eventname}\n'
@@ -92,12 +98,37 @@ class ASTtoJSONVisitor(StateMachineParserVisitor):
         states = {}
         for state_ctx in ctx.state_definition():
             state = self.visitState_definition(state_ctx, events, statemachine["uses_events"])
-        # TODO Fehlerbehandlung
+            if state["name"] in states:
+                raise DuplicatedStateDeclaration(state, states[state["name"]])
+            states[state["name"]] = state
         statemachine["states"] = states
 
     # Visit a parse tree produced by StateMachineParser#state_definition.
     def visitState_definition(self, ctx:StateMachineParser.State_definitionContext, events, used_events):
-        return self.visitChildren(ctx)
+        statename = self.visitState_identifier(ctx.state_identifier())
+        logging.info(f'visiting state declaration {statename} in line {ctx.start.line}')
+        state = {"name": statename}
+        state["declared_at"] = ctx.start.line
+        state["declared_in"] = self.filename_stack
+        joinstate = False
+        splitstate = False
+        if ctx.state_qualifier():
+            (joinstate, splitstate) = self.visitState_qualifier(ctx.state_qualifier)
+        if joinstate:
+            state["type"] = "joinstate"
+        elif splitstate:
+            state["type"] = "splitstate"
+        else:
+            state["type"] = "state"
+        return state
+
+
+    # Visit a parse tree produced by StateMachineParser#state_qualifier.
+    def visitState_qualifier(self, ctx:StateMachineParser.State_qualifierContext):
+        if ctx.join():
+            return (True,False)
+        else:
+            return (False,True)
 
     # Visit a parse tree produced by StateMachineParser#event_usage_body.
     def visitEvent_usage_body(self, ctx:StateMachineParser.Event_usage_bodyContext, events):
@@ -148,6 +179,10 @@ class ASTtoJSONVisitor(StateMachineParserVisitor):
     
     # Visit a parse tree produced by StateMachineParser#statemachine_name.
     def visitStatemachine_name(self, ctx:StateMachineParser.Statemachine_nameContext):
+        return str(ctx.IDENTIFIER())
+
+    # Visit a parse tree produced by StateMachineParser#state_identifier.
+    def visitState_identifier(self, ctx:StateMachineParser.State_identifierContext):
         return str(ctx.IDENTIFIER())
 
     def defaultResult(self):
