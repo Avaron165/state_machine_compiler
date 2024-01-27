@@ -63,7 +63,9 @@ state_body : state_statement*;
 
 state_statement : state_function | sub_statemachine ;
 
-sub_statemachine : STATEMACHINE statemachine_name (AS statemachine_name)? SEMICOLON ;
+sub_statemachine : STATEMACHINE statemachine_name (AS statemachine_alias_name)? SEMICOLON ;
+
+statemachine_alias_name : statemachine_name ;
 
 state_function : state_event COLON function_indentifier SEMICOLON ;
 
@@ -77,19 +79,13 @@ exit : EXIT ;
 
 transitions_definition_body : TRANSITIONS COLON transition+ ;
 
-transition :  transition_without_function | transition_with_function ;
+transition : event_classifier COLON from_state ARROW to_state (COLON function_indentifier)? SEMICOLON ;
 
-transition_without_function : event_classifier COLON from_state ARROW to_state SEMICOLON ;
-
-transition_with_function : event_classifier COLON from_state ARROW to_state COLON function_indentifier SEMICOLON ;
-
-from_state : state_identifier | submachine_port  ;
-
-submachine_port : statemachine_name DOT port_identifier ;
+from_state : state_identifier | (statemachine_name DOT port_identifier) ;
 
 port_identifier : IDENTIFIER ;
 
-to_state : state_identifier | statemachine_name DOT in_port ;
+to_state : state_identifier | (statemachine_name DOT in_port) ;
 
 event_classifier : event_name | automatic ;
 
